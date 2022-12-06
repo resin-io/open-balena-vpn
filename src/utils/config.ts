@@ -61,6 +61,8 @@ const getIPv4InterfaceInfo = (iface?: string): os.NetworkInterfaceInfo[] => {
 export const TRUST_PROXY = trustProxyVar('TRUST_PROXY', false);
 
 export const VPN_API_PORT = intVar('VPN_API_PORT');
+export const VPN_DOWNRATE = optionalVar('VPN_DOWNRATE');
+export const VPN_UPRATE = optionalVar('VPN_UPRATE');
 
 // milliseconds
 export const DEFAULT_SIGTERM_TIMEOUT =

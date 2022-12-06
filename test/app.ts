@@ -115,28 +115,46 @@ describe('VPN Events', function () {
 			.reply(200, 'OK');
 	});
 
-	it('should send a client-connect event', function () {
-		const connectEvent = getEvent('connect').then((body) => {
-			expect(body).to.have.property('serviceId').that.equals(instance.getId());
-			expect(body).to.have.property('uuids').that.deep.equals(['user2']);
-			expect(body).to.not.have.property('real_address');
-			expect(body).to.not.have.property('virtual_address');
-		});
+	async function verifyEvent(event: string) {
+		const body = await getEvent(event);
+		expect(body).to.have.property('serviceId').that.equals(instance.getId());
+		expect(body).to.have.property('uuids').that.deep.equals(['user2']);
+		expect(body).to.not.have.property('real_address');
+		expect(body).to.not.have.property('virtual_address');
+	}
 
+	it('should send a client-connect event', function () {
 		this.client = vpnClient.create(vpnDefaultOpts);
 		this.client.authenticate('user2', 'pass');
-		return this.client.connect().return(connectEvent);
+		return this.client.connect().return(verifyEvent('connect'));
 	});
 
 	it('should send a client-disconnect event', function () {
-		const disconnectEvent = getEvent('disconnect').then((body) => {
-			expect(body).to.have.property('serviceId').that.equals(instance.getId());
-			expect(body).to.have.property('uuids').that.deep.equals(['user2']);
-			expect(body).to.not.have.property('real_address');
-			expect(body).to.not.have.property('virtual_address');
-		});
+		return this.client.disconnect().return(verifyEvent('disconnect'));
+	});
+});
 
-		return this.client.disconnect().return(disconnectEvent);
+describe('More than one client', function () {
+	this.timeout(30 * 1000);
+
+	before(() => {
+		nock(BALENA_API_INTERNAL_HOST)
+			.get(/\/services\/vpn\/auth\/user[23]/)
+			.twice()
+			.reply(200, 'OK');
+	});
+	it('should connect two clients', async function () {
+		this.client = vpnClient.create(vpnDefaultOpts);
+		this.client.authenticate('user2', 'pass');
+
+		this.anotherClient = vpnClient.create(vpnDefaultOpts);
+		this.anotherClient.authenticate('user3', 'pass');
+		await this.client.connect();
+		return this.anotherClient.connect();
+	});
+	it('should disconnect two clients', async function () {
+		await this.client.disconnect();
+		return this.anotherClient.disconnect();
 	});
 });
 
@@ -377,4 +395,4 @@ describe('VPN proxy', function () {
 			});
 		});
 	});
-});
+ });

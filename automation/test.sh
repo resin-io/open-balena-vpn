@@ -29,6 +29,7 @@ cd "${WORKDIR}"
 test_id=$(docker run --privileged -d \
 	--tmpfs /run \
 	--tmpfs /sys/fs/cgroup \
+	--cap-add=NET_ADMIN \
 	-e PRODUCTION_MODE=false \
 	-e API_HOST=api.balena.test \
 	-e VPN_PORT=443 \
@@ -37,6 +38,8 @@ test_id=$(docker run --privileged -d \
 	-e VPN_BASE_PORT=10000 \
 	-e VPN_BASE_MANAGEMENT_PORT=20000 \
 	-e VPN_API_PORT=30000 \
+	-e VPN_DOWNRATE=5mbit \
+	-e VPN_UPRATE=5mbit \
 	-e VPN_HOST=127.0.0.1 \
 	-e VPN_CONNECT_INSTANCE_COUNT=1 \
 	-e VPN_CONNECT_PROXY_PORT=3128 \
@@ -63,4 +66,5 @@ docker exec "${test_id}" /bin/sh -ec '
 	echo "127.0.0.1 deadbeef.vpn" >> /etc/hosts
 	npm install
 	npm run test-unit
-	npx mocha test/app.ts'
+	npx mocha test/app.ts
+	cat /tmp/learn-address/status.log'
