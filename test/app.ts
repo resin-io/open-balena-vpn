@@ -395,4 +395,4 @@ describe('VPN proxy', function () {
 			});
 		});
 	});
- });
+});
