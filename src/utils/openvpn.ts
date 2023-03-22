@@ -26,7 +26,7 @@ const Telnet =
 	// tslint:disable-next-line:no-var-requires
 	require('telnet-client') as typeof import('telnet-client').default;
 
-import { VPN_API_PORT } from './config';
+import { VPN_API_PORT, VPN_DOWNRATE, VPN_UPRATE } from './config';
 import { Netmask } from './netmask';
 
 export interface VpnClientUntrustedData {
@@ -191,6 +191,11 @@ export class VpnManager extends EventEmitter {
 			'/etc/openvpn/scripts/client-connect-disconnect.sh',
 			`${this.instanceId}`,
 			`${VPN_API_PORT}`,
+			'--plugin',
+			'/etc/openvpn/plugins/openvpn-plugin-learn-address-script.so',
+			'/etc/openvpn/scripts/learn-address.sh',
+			`${VPN_DOWNRATE}`,
+			`${VPN_UPRATE}`,
 			'--plugin',
 			'/etc/openvpn/plugins/openvpn-plugin-auth-script.so',
 			'/etc/openvpn/scripts/auth',
